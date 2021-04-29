@@ -134,7 +134,8 @@ joint findPlaceForJoint() {
 
         if (mouseX > Math.min(firstJoint.X, secondJoint.X) && mouseY > Math.min(firstJoint.Y, secondJoint.Y)
           && mouseX < Math.max(firstJoint.X, secondJoint.X) && mouseY < Math.max(firstJoint.Y, secondJoint.Y) 
-          || firstJoint.getAngle(secondJoint) == 0) {
+          || firstJoint.getAngle(secondJoint) == 0 || firstJoint.getAngle(secondJoint) == 90) {
+
           smallestDistance = distanceToBeam;
           firstJointIndex = i;
           secondJointIndex = k;
@@ -155,29 +156,25 @@ joint findPlaceForJoint() {
     println(yHolder);
 
     if (firstJoint.getAngle(secondJoint) == 0) {
-      //test();
+      println("one");
       return(new joint(mouseX, yHolder, Integer.toString(joints.size())));
-      
-    }
-    
-    if (firstJoint.getAngle(secondJoint) == 90) {
-      test();
+    } else if (firstJoint.getAngle(secondJoint) == 90) {
+      println("two");
       return(new joint(xHolder, mouseY, Integer.toString(joints.size())));
-    }    
-    return(new joint((xHolder+mouseX)/2, (yHolder+mouseY)/2, Integer.toString(joints.size())));
+    } else {
+      println("three");
+      return(new joint((xHolder+mouseX)/2, (yHolder+mouseY)/2, Integer.toString(joints.size())));
+    }
   }
 
   return(new joint(mouseX, mouseY, Integer.toString(joints.size())));
 }
 void mousePressed() {
-  
+
   joints.add(findPlaceForJoint());
   for (int i = 0; i<joints.size(); i++) {
     joints.get(i).drawing();
   }
-}
-
-void draw() {
 
   for (int i=0; i<joints.size(); i++) {
     joint firstJoint = joints.get(i);
@@ -187,6 +184,18 @@ void draw() {
       println("angle between " + firstJoint.label +" and " + secondJoint.label + " is " + firstJoint.getAngle(secondJoint));
     }
   }
+}
+
+void draw() {
+
+  //for (int i=0; i<joints.size(); i++) {
+  //  joint firstJoint = joints.get(i);
+  //  for (int k=0; k<joints.get(i).connections.size(); k++) {
+  //    joint secondJoint = joints.get(firstJoint.connections.get(k));
+  //    println(firstJoint.label + " --> "+ secondJoint.label + ":  " + distanceOfMouseToBeamFunc(firstJoint, secondJoint));
+  //    println("angle between " + firstJoint.label +" and " + secondJoint.label + " is " + firstJoint.getAngle(secondJoint));
+  //  }
+  //}
 
   //println("there are : " +joints.size());
 }
