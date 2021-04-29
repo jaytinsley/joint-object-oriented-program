@@ -126,15 +126,13 @@ joint findPlaceForJoint() {
       joint secondJoint = joints.get(firstJoint.connections.get(k));
       int distanceToBeam = distanceOfMouseToBeamFunc(firstJoint, secondJoint);
       if (distanceToBeam<smallestDistance ) {
-        /*need to check if it is within the bounds of the points 
-         if confused check sketch book again
-         */
-
-        //if (within boinds of points) {
+        
+       if(mouseX > Math.min(firstJoint.X,secondJoint.X) && mouseY > Math.min(firstJoint.Y,secondJoint.Y)
+       && mouseX < Math.max(firstJoint.X,secondJoint.X) && mouseY < Math.max(firstJoint.Y,secondJoint.Y)) {
           smallestDistance = distanceToBeam;
           firstJointIndex = i;
           secondJointIndex = k;
-        //}
+        }
       }
     }
   }
