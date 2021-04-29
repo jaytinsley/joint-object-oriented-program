@@ -42,11 +42,16 @@ int findYpointOnLine(joint firstJoint, joint secondJoint) {
   return(posY);
 }
 
+void test() {
+  println("test");
+}
+
+
 void setup() {
   size(800, 800);
 
   //Adds the two starting joints to the array and ensures they are connected 
-  joints.add(new joint(((width/4)*3), (height/4)*3, Integer.toString(0)));
+  joints.add(new joint(((width/4)), (height/4), Integer.toString(0)));
   joints.add(new joint(width/4, (height/4)*3, Integer.toString(1)));
 
   joints.add(new joint(width/2, (height/2), Integer.toString(2)));
@@ -126,9 +131,10 @@ joint findPlaceForJoint() {
       joint secondJoint = joints.get(firstJoint.connections.get(k));
       int distanceToBeam = distanceOfMouseToBeamFunc(firstJoint, secondJoint);
       if (distanceToBeam<smallestDistance ) {
-        
-       if(mouseX > Math.min(firstJoint.X,secondJoint.X) && mouseY > Math.min(firstJoint.Y,secondJoint.Y)
-       && mouseX < Math.max(firstJoint.X,secondJoint.X) && mouseY < Math.max(firstJoint.Y,secondJoint.Y)) {
+
+        if (mouseX > Math.min(firstJoint.X, secondJoint.X) && mouseY > Math.min(firstJoint.Y, secondJoint.Y)
+          && mouseX < Math.max(firstJoint.X, secondJoint.X) && mouseY < Math.max(firstJoint.Y, secondJoint.Y) 
+          || firstJoint.getAngle(secondJoint) == 0) {
           smallestDistance = distanceToBeam;
           firstJointIndex = i;
           secondJointIndex = k;
@@ -137,19 +143,34 @@ joint findPlaceForJoint() {
     }
   }
 
-  if (smallestDistance <  30) {
+  if (smallestDistance <  20) {
+    //println("rest");
+
     joint firstJoint = joints.get(firstJointIndex);
     joint secondJoint = joints.get(firstJoint.connections.get(secondJointIndex));
 
     int xHolder = findXpointOnLine(firstJoint, secondJoint);
+    println(xHolder);
     int yHolder = findYpointOnLine(firstJoint, secondJoint);
+    println(yHolder);
 
+    if (firstJoint.getAngle(secondJoint) == 0) {
+      //test();
+      return(new joint(mouseX, yHolder, Integer.toString(joints.size())));
+      
+    }
+    
+    if (firstJoint.getAngle(secondJoint) == 90) {
+      test();
+      return(new joint(xHolder, mouseY, Integer.toString(joints.size())));
+    }    
     return(new joint((xHolder+mouseX)/2, (yHolder+mouseY)/2, Integer.toString(joints.size())));
   }
 
   return(new joint(mouseX, mouseY, Integer.toString(joints.size())));
 }
 void mousePressed() {
+  
   joints.add(findPlaceForJoint());
   for (int i = 0; i<joints.size(); i++) {
     joints.get(i).drawing();
@@ -163,8 +184,9 @@ void draw() {
     for (int k=0; k<joints.get(i).connections.size(); k++) {
       joint secondJoint = joints.get(firstJoint.connections.get(k));
       println(firstJoint.label + " --> "+ secondJoint.label + ":  " + distanceOfMouseToBeamFunc(firstJoint, secondJoint));
+      println("angle between " + firstJoint.label +" and " + secondJoint.label + " is " + firstJoint.getAngle(secondJoint));
     }
   }
 
-  println("there are : " +joints.size());
+  //println("there are : " +joints.size());
 }
