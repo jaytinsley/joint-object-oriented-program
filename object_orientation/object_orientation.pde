@@ -1,11 +1,13 @@
 //----------------------------------------------------Necessary global variables--------------------------------------------------------------
-//int currentJoint = -1;
+
 ArrayList <joint> joints = new ArrayList <joint>();
 
 //-----------------------------------------------------Testing global variables--------------------------------------------------------------
 
 
+
 //---------------------------------------------------------Math Functions--------------------------------------------------------------
+
 int distanceOfMouseToBeamFunc(joint firstJoint, joint secondJoint) {
   float X1 = firstJoint.X;
   float Y1 = firstJoint.Y;
@@ -38,7 +40,9 @@ int findYpointOnLine(joint firstJoint, joint secondJoint) {
 
   float Y2 = secondJoint.Y;
   float X2 = secondJoint.X;
+
   int posY = int(((Y2 - Y1)*(mouseX-X1)/(X2-X1))+Y1);
+
   return(posY);
 }
 
@@ -51,19 +55,15 @@ void setup() {
   size(800, 800);
 
   //Adds the two starting joints to the array and ensures they are connected 
-  joints.add(new joint(((width/4)), (height/4), Integer.toString(0)));
+  joints.add(new joint(((width/4)*3), (height/4)*3, Integer.toString(0)));
   joints.add(new joint(width/4, (height/4)*3, Integer.toString(1)));
-
-  joints.add(new joint(width/2, (height/2), Integer.toString(2)));
-
-
 
   //each Joints connections array is appended with the index of the other joint
   joints.get(joints.size()-2).connections.append(joints.size()-1);
   joints.get(joints.size()-1).connections.append(joints.size()-2);
   //In this example (joints.size()-2) is the index/location of joint in the array of the first joint.
 
-  joints.get(joints.size()-2).connections.append(joints.size()-3);
+  //joints.get(joints.size()-2).connections.append(joints.size()-3);
 
   joints.get(joints.size()-1).isCurrentJoint = true;
 
@@ -121,10 +121,11 @@ class joint {
   }
 }
 
-joint findPlaceForJoint() {
+void newJoint() {
   int smallestDistance = width*height;
   int firstJointIndex = -1;
   int secondJointIndex = -1;
+
   for (int i=0; i<joints.size(); i++) {
     joint firstJoint = joints.get(i);
     for (int k=0; k<joints.get(i).connections.size(); k++) {
@@ -145,7 +146,6 @@ joint findPlaceForJoint() {
   }
 
   if (smallestDistance <  20) {
-    //println("rest");
 
     joint firstJoint = joints.get(firstJointIndex);
     joint secondJoint = joints.get(firstJoint.connections.get(secondJointIndex));
@@ -156,36 +156,89 @@ joint findPlaceForJoint() {
     println(yHolder);
 
     if (firstJoint.getAngle(secondJoint) == 0) {
-      println("one");
-      return(new joint(mouseX, yHolder, Integer.toString(joints.size())));
+
+      joints.add(new joint(mouseX, yHolder, Integer.toString(joints.size())));
     } else if (firstJoint.getAngle(secondJoint) == 90) {
-      println("two");
-      return(new joint(xHolder, mouseY, Integer.toString(joints.size())));
+
+      joints.add(new joint(xHolder, mouseY, Integer.toString(joints.size())));
     } else {
-      println("three");
-      return(new joint((xHolder+mouseX)/2, (yHolder+mouseY)/2, Integer.toString(joints.size())));
+
+      joints.add(new joint((xHolder+mouseX)/2, (yHolder+mouseY)/2, Integer.toString(joints.size())));
+    }
+  } else {
+
+    joints.add(new joint(mouseX, mouseY, Integer.toString(joints.size())));
+  }
+}
+
+int nearJoint() {
+
+  for (int i = 0; i<joints.size(); i++) {
+    joint firstJoint = joints.get(i);
+
+    if (mouseX > firstJoint.X-50 && mouseY > firstJoint.Y-50
+      && mouseX < firstJoint.X+50 && mouseY < firstJoint.Y+50) {
+      return(i);
     }
   }
-
-  return(new joint(mouseX, mouseY, Integer.toString(joints.size())));
+  return(-1);
 }
-void mousePressed() {
-
-  joints.add(findPlaceForJoint());
+void drawAllJoints() {
   for (int i = 0; i<joints.size(); i++) {
     joints.get(i).drawing();
   }
-
-  for (int i=0; i<joints.size(); i++) {
-    joint firstJoint = joints.get(i);
-    for (int k=0; k<joints.get(i).connections.size(); k++) {
-      joint secondJoint = joints.get(firstJoint.connections.get(k));
-      println(firstJoint.label + " --> "+ secondJoint.label + ":  " + distanceOfMouseToBeamFunc(firstJoint, secondJoint));
-      println("angle between " + firstJoint.label +" and " + secondJoint.label + " is " + firstJoint.getAngle(secondJoint));
-    }
-  }
 }
 
+void mousePressed() {
+
+  if (nearJoint() != -1) {
+    //this returns the index of the joint it will be near
+    //since it isnt returning -1 it is near a joint
+
+    for (int i = 0; i<joints.size(); i++) {
+      //makes all the joints not the current one.
+      if (joints.get(i).isCurrentJoint == true) {
+        joints.get(i).connections.append(nearJoint());
+        joints.get(nearJoint()).connections.append(i);
+
+        joints.get(i).isCurrentJoint = false;
+      }
+    }
+    //makes the joint near the mouse the current joint.
+    joints.get(nearJoint()).isCurrentJoint = true;
+  } else {
+    newJoint();
+
+    for (int i = 0; i<joints.size(); i++) {
+      if (joints.get(i).isCurrentJoint == true) {
+        joints.get(i).connections.append(joints.size()-1);
+        joints.get(joints.size()-1).connections.append(i);
+        joints.get(i).isCurrentJoint = false;
+      }
+    }
+    joints.get(joints.size()-1).isCurrentJoint = true;
+  }
+
+
+  drawAllJoints();
+  println("there are: "+countBeams()+" beams.");
+}
+
+int countBeams() {
+  int counter = 0;
+  for (int i=0; i<joints.size(); i++) {
+    joint firstJoint = joints.get(i);
+    for (int k=0; k<firstJoint.connections.size(); k++) {
+      //joint secondJoint = joints.get(firstJoint.connections.get(k));
+
+      //println(firstJoint.label + " --> "+ secondJoint.label + ":  " + distanceOfMouseToBeamFunc(firstJoint, secondJoint));
+
+      //println("angle between " + firstJoint.label +" and " + secondJoint.label + " is " + firstJoint.getAngle(secondJoint));
+      counter++;
+    }
+  }
+  return(counter);
+}
 void draw() {
 
   //for (int i=0; i<joints.size(); i++) {
@@ -198,4 +251,13 @@ void draw() {
   //}
 
   //println("there are : " +joints.size());
+
+  for (int i = 0; i<joints.size(); i++) {
+    //println(i);
+    joint firstJoint = joints.get(i);
+    if (mouseX > firstJoint.X && mouseY > firstJoint.Y
+      && mouseX < firstJoint.X && mouseY < firstJoint.Y) {
+      println(joints.get(i).label);
+    }
+  }
 }
