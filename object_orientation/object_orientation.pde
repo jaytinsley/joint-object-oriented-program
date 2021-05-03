@@ -121,7 +121,9 @@ class joint {
   }
 }
 //
-void newJoint() {
+int[] arrayofJointsIndexsThatMakeUpBeamMouseIsNear() {
+
+  int[] arrayofJointIndex = {-1, -1};
   int smallestDistance = width*height;
   int firstJointIndex = -1;
   int secondJointIndex = -1;
@@ -146,29 +148,11 @@ void newJoint() {
   }
 
   if (smallestDistance <  20) {
+    arrayofJointIndex[0] = firstJointIndex;
+    arrayofJointIndex[1] = secondJointIndex;
+  } 
 
-    joint firstJoint = joints.get(firstJointIndex);
-    joint secondJoint = joints.get(firstJoint.connections.get(secondJointIndex));
-
-    int xHolder = findXpointOnLine(firstJoint, secondJoint);
-    println(xHolder);
-    int yHolder = findYpointOnLine(firstJoint, secondJoint);
-    println(yHolder);
-
-    if (firstJoint.getAngle(secondJoint) == 0) {
-
-      joints.add(new joint(mouseX, yHolder, Integer.toString(joints.size())));
-    } else if (firstJoint.getAngle(secondJoint) == 90) {
-
-      joints.add(new joint(xHolder, mouseY, Integer.toString(joints.size())));
-    } else {
-
-      joints.add(new joint((xHolder+mouseX)/2, (yHolder+mouseY)/2, Integer.toString(joints.size())));
-    }
-  } else {
-
-    joints.add(new joint(mouseX, mouseY, Integer.toString(joints.size())));
-  }
+  return(arrayofJointIndex);
 }
 
 int nearJoint() {
@@ -207,12 +191,50 @@ void mousePressed() {
     //makes the joint near the mouse the current joint.
     joints.get(nearJoint()).isCurrentJoint = true;
   } else {
-    newJoint();
+    //creating a new Joint
+    if (arrayofJointsIndexsThatMakeUpBeamMouseIsNear()[0]!= -1) {
+
+      joint firstJoint = joints.get(arrayofJointsIndexsThatMakeUpBeamMouseIsNear()[0]);
+      joint secondJoint = joints.get(firstJoint.connections.get(arrayofJointsIndexsThatMakeUpBeamMouseIsNear()[1]));
+
+      int xHolder = findXpointOnLine(firstJoint, secondJoint);
+      int yHolder = findYpointOnLine(firstJoint, secondJoint);
+
+
+      if (firstJoint.getAngle(secondJoint) == 0) {
+        //mouse is on a beam horizontal
+        joints.add(new joint(mouseX, yHolder, Integer.toString(joints.size())));
+      } else if (firstJoint.getAngle(secondJoint) == 90) {
+        //mouse is on a beam vertical
+        joints.add(new joint(xHolder, mouseY, Integer.toString(joints.size())));
+      } else {
+        //mouse is near a beam on an angle
+        joints.add(new joint((xHolder+mouseX)/2, (yHolder+mouseY)/2, Integer.toString(joints.size())));
+      }
+    } else {
+      //mouse isn't near a joint nor a beam
+      joints.add(new joint(mouseX, mouseY, Integer.toString(joints.size())));
+    }
+
+    /*
+      i need to take the the two joints returned by the close to beam program and use it to treat the beam as two seperate parts
+     */
+
+
 
     for (int i = 0; i<joints.size(); i++) {
+
+
+
+      //loops throught the joints to find the current joint
       if (joints.get(i).isCurrentJoint == true) {
+
+        // ↓ takes the current Joint and adds the newest joint to its list of connections
         joints.get(i).connections.append(joints.size()-1);
+
+        // ↓ takes the latestJoint and adds the current joint to its list of connections
         joints.get(joints.size()-1).connections.append(i);
+
         joints.get(i).isCurrentJoint = false;
       }
     }
