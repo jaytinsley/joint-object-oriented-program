@@ -120,7 +120,7 @@ class joint {
     return(atan((Ydiff/Xdiff))*180/PI);
   }
 }
-
+//
 void newJoint() {
   int smallestDistance = width*height;
   int firstJointIndex = -1;
