@@ -50,6 +50,25 @@ void test() {
   println("test");
 }
 
+void keyReleased() {
+  if (key == 'p') {
+    print("currentJoint is ");
+    for (int i =0; i<joints.size(); i++) {
+      if (joints.get(i).isCurrentJoint) {
+        print(joints.get(i).label);
+        print(" and is connected to ");
+        //print(joints.get(i).connections.size());
+        
+        //print(" many joints");
+        for (int y =0; y<joints.get(i).connections.size(); y++){
+          print(" "+joints.get(i).connections.get(y));
+        }
+      }
+    }
+    println();
+  }
+}
+
 
 void setup() {
   size(800, 800);
@@ -95,7 +114,7 @@ class joint {
 
     circle(X, Y, 10);
     fill(0);
-    text(label, X+10, Y-10);
+    text(label, X+20, Y-10);
   }
   void drawConnections() {
     for (int i=0; i<connections.size(); i++) {
@@ -149,7 +168,7 @@ int[] arrayofJointsIndexsThatMakeUpBeamMouseIsNear() {
 
   if (smallestDistance <  20) {
     arrayofJointIndex[0] = firstJointIndex;
-    arrayofJointIndex[1] = secondJointIndex;
+    arrayofJointIndex[1] = joints.get(firstJointIndex).connections.get(secondJointIndex);
   } 
 
   return(arrayofJointIndex);
@@ -195,7 +214,7 @@ void mousePressed() {
     if (arrayofJointsIndexsThatMakeUpBeamMouseIsNear()[0]!= -1) {
 
       joint firstJoint = joints.get(arrayofJointsIndexsThatMakeUpBeamMouseIsNear()[0]);
-      joint secondJoint = joints.get(firstJoint.connections.get(arrayofJointsIndexsThatMakeUpBeamMouseIsNear()[1]));
+      joint secondJoint = joints.get(arrayofJointsIndexsThatMakeUpBeamMouseIsNear()[1]);
 
       int xHolder = findXpointOnLine(firstJoint, secondJoint);
       int yHolder = findYpointOnLine(firstJoint, secondJoint);
@@ -211,13 +230,27 @@ void mousePressed() {
         //mouse is near a beam on an angle
         joints.add(new joint((xHolder+mouseX)/2, (yHolder+mouseY)/2, Integer.toString(joints.size())));
       }
+
+
+      for (int i = 0; i<firstJoint.connections.size(); i++) {
+        if (firstJoint.connections.get(i) == int(secondJoint.label)) {
+          firstJoint.connections.set(i, joints.size()-1); //<>//
+        }
+      }
+
+      for (int i = 0; i<secondJoint.connections.size(); i++) {
+        println("secondJoint is "+ secondJoint.label);
+        if (secondJoint.connections.get(i) == int(firstJoint.label)) {
+          secondJoint.connections.set(i, joints.size()-1);
+        }
+      }
+      
+      
+      
     } else {
       //mouse isn't near a joint nor a beam
       joints.add(new joint(mouseX, mouseY, Integer.toString(joints.size())));
     }
-
-
-
 
     for (int i = 0; i<joints.size(); i++) {
 
@@ -236,19 +269,30 @@ void mousePressed() {
     joints.get(joints.size()-1).isCurrentJoint = true;
   }
 
-  /*
-      i need to take the the two joints returned by the close to beam program and use it to treat the beam as two seperate parts
-   */
-  int firstJointIndex = arrayofJointsIndexsThatMakeUpBeamMouseIsNear()[0];
-  int secondJointIndex = arrayofJointsIndexsThatMakeUpBeamMouseIsNear()[1];
+  ///*
+  //    i need to take the the two joints returned by the close to beam program and use it to treat the beam as two seperate parts
+  // */
 
+  //joint firstJoint = joints.get(arrayofJointsIndexsThatMakeUpBeamMouseIsNear()[0]);
+  //joint secondJoint = joints.get(arrayofJointsIndexsThatMakeUpBeamMouseIsNear()[1]);
+
+  //for (int i = 0; i<firstJoint.connections.size(); i++) {
+  //  if (firstJoint.connections.get(i) == int(secondJoint.label)) {
+  //    firstJoint.connections.set(i, joints.size()-1);
+  //  }
+  //}
+
+  //for (int i = 0; i<secondJoint.connections.size(); i++) {
+  //  if (secondJoint.connections.get(i) == int(firstJoint.label)) {
+  //    secondJoint.connections.set(i, joints.size()-1);
+  //  }
+  //}
+  ////firstJoint.connections.
   // this gets the second joint in such a strange way
   //removes the first of the two joints the function returned from the second one
-  joints.get(joints.get(firstJointIndex).connections.get(secondJointIndex)).connections.remove(firstJointIndex);
 
   //removes the second of the two joints the function returned from the first one
 
-  joints.get(firstJointIndex).connections.remove(secondJointIndex);
 
   drawAllJoints();
   println("there are: "+countBeams()+" beams.");
