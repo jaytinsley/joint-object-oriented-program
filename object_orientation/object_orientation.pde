@@ -216,15 +216,10 @@ void mousePressed() {
       joints.add(new joint(mouseX, mouseY, Integer.toString(joints.size())));
     }
 
-    /*
-      i need to take the the two joints returned by the close to beam program and use it to treat the beam as two seperate parts
-     */
 
 
 
     for (int i = 0; i<joints.size(); i++) {
-
-
 
       //loops throught the joints to find the current joint
       if (joints.get(i).isCurrentJoint == true) {
@@ -241,6 +236,19 @@ void mousePressed() {
     joints.get(joints.size()-1).isCurrentJoint = true;
   }
 
+  /*
+      i need to take the the two joints returned by the close to beam program and use it to treat the beam as two seperate parts
+   */
+  int firstJointIndex = arrayofJointsIndexsThatMakeUpBeamMouseIsNear()[0];
+  int secondJointIndex = arrayofJointsIndexsThatMakeUpBeamMouseIsNear()[1];
+
+  // this gets the second joint in such a strange way
+  //removes the first of the two joints the function returned from the second one
+  joints.get(joints.get(firstJointIndex).connections.get(secondJointIndex)).connections.remove(firstJointIndex);
+
+  //removes the second of the two joints the function returned from the first one
+
+  joints.get(firstJointIndex).connections.remove(secondJointIndex);
 
   drawAllJoints();
   println("there are: "+countBeams()+" beams.");
